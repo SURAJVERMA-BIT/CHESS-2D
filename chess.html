@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grandmaster Chess Suite</title>
+    <style>
+        /* --- PREMIUM VARIABLES --- */
+        :root {
+            --gold-primary: #D4AF37; /* Metallic Gold */
+            --gold-hover: #F2C94C;
+            --dark-bg: #0a0a0a;
+            --glass-panel: rgba(20, 20, 20, 0.75);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0A0;
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- THEME DEFINITIONS --- */
+        body.theme-onyx {
+            /* Default Luxury Dark */
+            --board-light: #C0C0C0; /* Silver-ish */
+            --board-dark: #404040;  /* Dark Graphite */
+            --highlight: rgba(212, 175, 55, 0.6); /* Gold tint */
+            --check-pulse: rgba(200, 50, 50, 0.8);
+            --bg-overlay: linear-gradient(135deg, #121212 0%, #1f1f1f 100%);
+        }
+        
+        body.theme-ivory {
+            /* Classic Warm Wood */
+            --board-light: #E8D0AA;
+            --board-dark: #8B5A2B;
+            --highlight: rgba(255, 255, 100, 0.5);
+            --check-pulse: rgba(220, 60, 60, 0.8);
+            --bg-overlay: linear-gradient(135deg, #2C1A1A 0%, #5C3A21 100%);
+        }
+
+        body.theme-sapphire {
+            /* Deep Blue Luxury */
+            --board-light: #E0F2F1;
+            --board-dark: #37474F;
+            --highlight: rgba(100, 255, 218, 0.4);
+            --check-pulse: rgba(255, 82, 82, 0.8);
+            --bg-overlay: linear-gradient(135deg, #0F2027 0%, #203A43 100%);
+        }
+        
+        body.theme-ruby {
+            /* Regal Red */
+            --board-light: #FCE4EC;
+            --board-dark: #880E4F;
+            --highlight: rgba(255, 160, 0, 0.4);
+            --check-pulse: #FF1744;
+            --bg-overlay: linear-gradient(135deg, #4A192C 0%, #1A050B 100%);
+        }
+
+        /* --- RESET & LAYOUT --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Cinzel', 'Segoe UI', serif; }
+        
+        body {
+            background: var(--bg-overlay);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            overflow: hidden;
+            transition: background 0.8s ease;
+        }
+
+        /* --- MAIN MENU (The "Wow" Factor) --- */
+        #main-menu {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            background: url('cover.avif') no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Dark Cinematic Gradient Overlay for Menu */
+        #main-menu::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,1) 90%),
+                        linear-gradient(to right, #000 0%, rgba(0,0,0,0.8) 40%, transparent 100%);
+            z-index: 1;
+        }
+
+        .menu-content {
+            position: relative;
+            z-index: 2;
+            padding-left: 8vw;
+            max-width: 600px;
+            animation: fadeSlideIn 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        h1.title {
+            font-size: 5.5rem;
+            line-height: 0.9;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to bottom right, #fff, #bbb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1.title span {
+            color: var(--gold-primary);
+            -webkit-text-fill-color: var(--gold-primary);
+            display: block;
+        }
+
+        p.subtitle {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 3rem;
+            border-left: 3px solid var(--gold-primary);
+            padding-left: 15px;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-group { display: flex; flex-direction: column; gap: 20px; width: 280px; }
+
+        .btn {
+            padding: 18px 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%); /* Tech/Cyber cut */
+        }
+
+        .btn-play {
+            background: var(--gold-primary);
+            color: #000;
+        }
+
+        .btn-play:hover {
+            background: var(--gold-hover);
+            transform: translateX(10px);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-settings {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-settings:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(10px);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        /* --- APP CONTAINER (Glassmorphism) --- */
+        .app-container {
+            display: flex;
+            gap: 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+            transform: scale(0.98);
+        }
+
+        .app-container.visible {
+            opacity: 1;
+            pointer-events: all;
+            transform: scale(1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            height: 680px;
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .icon-btn:hover { color: var(--gold-primary); transform: scale(1.1); }
+
+        .player-card {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        .player-card.active {
+            border-color: var(--gold-primary);
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent);
+        }
+
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #888;
+        }
+        .player-card.active .player-avatar { color: #fff; background: var(--gold-primary); }
+
+        .move-log {
+            flex: 1;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Segoe UI', monospace;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        /* --- CHESS BOARD --- */
+        .board-frame {
+            padding: 20px;
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: var(--glass-border);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 80px);
+            grid-template-rows: repeat(8, 80px);
+            border: 5px solid #222;
+        }
+
+        .square {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 52px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .square.light { background: var(--board-light); color: var(--board-dark); }
+        .square.dark { background: var(--board-dark); color: var(--board-light); }
+
+        .piece {
+            z-index: 2;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4));
+            transition: transform 0.2s;
+        }
+        
+        /* --- VISUAL INDICATORS (Fixed Contrast) --- */
+        /* Selection */
+        .square.selected::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--highlight);
+            z-index: 1;
+        }
+
+        /* Last Move (Frame Style for contrast) */
+        .square.last-move::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 4px solid var(--highlight);
+            box-shadow: inset 0 0 15px var(--highlight);
+            z-index: 1;
+        }
+
+        /* Check */
+        .square.check-square {
+            background: var(--check-pulse) !important;
+            animation: pulseRed 1s infinite;
+        }
+
+        /* Valid Move Dots */
+        .assist-mode .square.valid-move::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            z-index: 1;
+        }
+        /* Valid Capture Corners */
+        .assist-mode .square.valid-move.has-piece::before {
+            background: transparent;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            border: 6px solid rgba(0,0,0,0.3);
+            box-sizing: border-box;
+            clip-path: polygon(0 0, 20% 0, 0 20%, 0 100%, 20% 100%, 0 80%, 100% 100%, 80% 100%, 100% 80%, 100% 0, 80% 0, 100% 20%);
+        }
+
+        /* --- MODALS --- */
+        #settings-modal, #game-over-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        #settings-modal.active, #game-over-modal.active { opacity: 1; pointer-events: all; }
+
+        .modal-box {
+            background: #111;
+            border: 1px solid #333;
+            width: 450px;
+            padding: 40px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .modal-title { font-size: 1.8rem; margin-bottom: 30px; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .setting-label { color: #ccc; font-size: 1.1rem; }
+        
+        select.premium-select {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px 15px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        /* Animations */
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulseRed { 0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0.7); } 70% { box-shadow: inset 0 0 30px 10px rgba(255,0,0,0); } 100% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); } }
+        .hidden { display: none !important; }
+
+        @media (max-width: 1000px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; order: 2; }
+            .chessboard { grid-template-columns: repeat(8, 11vw); grid-template-rows: repeat(8, 11vw); }
+            .square { width: 11vw; height: 11vw; font-size: 8vw; }
+        }
+    </style>
+</head>
+<body class="theme-onyx">
+
+    <div id="main-menu">
+        <div class="menu-content">
+            <h1 class="title">CHESS<br><span>MASTER</span></h1>
+            <p class="subtitle">The Royal Game Reimagined</p>
+            <div class="btn-group">
+                <button class="btn btn-play" onclick="startGame()">Start Match</button>
+                <button class="btn btn-settings" onclick="toggleModal('settings-modal', true)">Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal">
+        <div class="modal-box">
+            <button style="position:absolute; top:15px; right:20px; background:none; border:none; color:#666; font-size:1.5rem; cursor:pointer;" onclick="toggleModal('settings-modal', false)">✕</button>
+            <h2 class="modal-title">Preferences</h2>
+            
+            <div class="setting-item">
+                <span class="setting-label">Board Theme</span>
+                <select class="premium-select" onchange="changeTheme(this.value)">
+                    <option value="onyx">Onyx & Silver (Dark)</option>
+                    <option value="ivory">Ivory & Wood (Classic)</option>
+                    <option value="sapphire">Midnight Sapphire (Blue)</option>
+                    <option value="ruby">Imperial Ruby (Red)</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">Sound FX</span>
+                <input type="checkbox" checked id="sound-toggle" style="accent-color: var(--gold-primary); transform: scale(1.5);">
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">Move Assist</span>
+                <input type="checkbox" checked id="assist-toggle" onchange="toggleAssist()" style="accent-color: var(--gold-primary); transform: scale(1.5);">
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container" id="game-app">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <button class="icon-btn" onclick="exitGame()">⌂</button>
+                <button class="icon-btn" onclick="resetGame()">↻</button>
+                <button class="icon-btn" onclick="toggleModal('settings-modal', true)">⚙</button>
+            </div>
+
+            <div class="player-card" id="card-black">
+                <div class="player-avatar">♚</div>
+                <div>
+                    <div style="font-weight:bold; color:#fff;">Black</div>
+                    <div style="font-size:0.8rem; color:#888;">AI Level: Grandmaster</div>
+                </div>
+            </div>
+
+            <div class="move-log" id="move-log">
+                <div style="text-align:center; padding-top:20px; opacity:0.5;">Match Started</div>
+            </div>
+
+            <div class="player-card active" id="card-white">
+                <div class="player-avatar">♔</div>
+                <div>
+                    <div style="font-weight:bold; color:#fff;">White</div>
+                    <div style="font-size:0.8rem; color:#888;">Player Name</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="board-frame">
+            <div class="chessboard assist-mode" id="board"></div>
+        </main>
+    </div>
+
+    <div id="game-over-modal">
+        <div class="modal-box" style="text-align:center;">
+            <h2 class="modal-title" style="border:none; margin-bottom:10px;">Checkmate</h2>
+            <p id="winner-text" style="color:#fff; margin-bottom:30px; font-size:1.2rem;">White Wins!</p>
+            <button class="btn btn-play" onclick="resetGame(); toggleModal('game-over-modal', false)">New Game</button>
+            <br><br>
+            <button class="btn btn-settings" onclick="exitGame(); toggleModal('game-over-modal', false)">Exit</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- LOGIC ENGINE --- */
+        const PIECES = { 'white': { k:'♔',q:'♕',r:'♖',b:'♗',n:'♘',p:'♙'}, 'black': { k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'} };
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        let state = {
+            board: [],
+            turn: 'white',
+            selected: null,
+            moves: [], // history
+            kingPos: {white:[7,4], black:[0,4]},
+            lastMove: []
+        };
+
+        /* Initialization */
+        function startGame() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('game-app').classList.add('visible');
+            initBoard();
+        }
+
+        function exitGame() {
+            document.getElementById('game-app').classList.remove('visible');
+            setTimeout(() => {
+                document.getElementById('main-menu').classList.remove('hidden');
+            }, 500);
+        }
+
+        function initBoard() {
+            const layout = [
+                ['r','n','b','q','k','b','n','r'],
+                ['p','p','p','p','p','p','p','p'],
+                Array(8).fill('.'), Array(8).fill('.'), Array(8).fill('.'), Array(8).fill('.'),
+                ['P','P','P','P','P','P','P','P'],
+                ['R','N','B','Q','K','B','N','R']
+            ];
+            state.board = layout.map(row => [...row]);
+            state.turn = 'white';
+            state.selected = null;
+            state.kingPos = {white:[7,4], black:[0,4]};
+            state.lastMove = [];
+            document.getElementById('move-log').innerHTML = '';
+            render();
+            updateUI();
+        }
+
+        /* Rendering */
+        function render() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            
+            state.board.forEach((row, r) => {
+                row.forEach((cell, c) => {
+                    const sq = document.createElement('div');
+                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+                    sq.dataset.r = r; 
+                    sq.dataset.c = c;
+
+                    // Last Move Highlight
+                    if(state.lastMove.length) {
+                        const [fr, fc, tr, tc] = state.lastMove;
+                        if((r===fr && c===fc) || (r===tr && c===tc)) sq.classList.add('last-move');
+                    }
+
+                    // Check Highlight
+                    if(inCheck(state.turn) && r===state.kingPos[state.turn][0] && c===state.kingPos[state.turn][1]) {
+                        sq.classList.add('check-square');
+                    }
+
+                    // Piece Render
+                    if(cell !== '.') {
+                        const p = document.createElement('div');
+                        p.className = 'piece';
+                        p.textContent = PIECES[cell===cell.toUpperCase()?'white':'black'][cell.toLowerCase()];
+                        p.style.color = (cell===cell.toUpperCase()) ? '#fff' : '#111';
+                        // Text shadow for white pieces to pop against light squares
+                        if(cell===cell.toUpperCase()) p.style.textShadow = "0 0 2px #000";
+                        sq.appendChild(p);
+                    }
+
+                    sq.onclick = () => handleClick(r, c);
+                    boardEl.appendChild(sq);
+                });
+            });
+
+            // Re-apply selection visuals
+            if(state.selected) {
+                const [sr, sc] = state.selected;
+                const selSq = boardEl.children[sr*8+sc];
+                selSq.classList.add('selected');
+                
+                // Show Legal Moves
+                const moves = getLegalMoves(sr, sc);
+                moves.forEach(([tr, tc]) => {
+                    const tSq = boardEl.children[tr*8+tc];
+                    tSq.classList.add('valid-move');
+                    if(state.board[tr][tc] !== '.') tSq.classList.add('has-piece');
+                });
+            }
+        }
+
+        /* Interaction */
+        function handleClick(r, c) {
+            const cell = state.board[r][c];
+            const isOwn = cell !== '.' && (state.turn === 'white' ? cell===cell.toUpperCase() : cell===cell.toLowerCase());
+
+            if(state.selected) {
+                const [sr, sc] = state.selected;
+                const moves = getLegalMoves(sr, sc);
+                if(moves.some(m => m[0]===r && m[1]===c)) {
+                    makeMove(sr, sc, r, c);
+                    return;
+                }
+            }
+
+            if(isOwn) {
+                state.selected = [r, c];
+                render();
+            } else {
+                state.selected = null;
+                render();
+            }
+        }
+
+        function makeMove(fr, fc, tr, tc) {
+            const piece = state.board[fr][fc];
+            const target = state.board[tr][tc];
+            
+            // Execute
+            state.board[tr][tc] = piece;
+            state.board[fr][fc] = '.';
+            
+            // Track King
+            if(piece.toLowerCase() === 'k') state.kingPos[state.turn] = [tr, tc];
+            
+            // Auto-Promote Queen
+            if(piece === 'P' && tr === 0) state.board[tr][tc] = 'Q';
+            if(piece === 'p' && tr === 7) state.board[tr][tc] = 'q';
+
+            // Logs & Sound
+            state.lastMove = [fr, fc, tr, tc];
+            logMove(piece, tr, tc, target !== '.');
+            playSound(target !== '.' ? 'capture' : 'move');
+
+            // Switch Turn
+            state.turn = state.turn === 'white' ? 'black' : 'white';
+            state.selected = null;
+            
+            // Check State
+            if(inCheck(state.turn)) {
+                playSound('check');
+                if(isCheckmate()) {
+                    setTimeout(() => {
+                        document.getElementById('winner-text').innerText = `${state.turn==='white'?'Black':'White'} Wins!`;
+                        toggleModal('game-over-modal', true);
+                    }, 500);
+                }
+            }
+
+            render();
+            updateUI();
+        }
+
+        /* Rules Engine (Simplified) */
+        function getLegalMoves(r, c) {
+            const p = state.board[r][c];
+            if(p === '.') return [];
+            
+            const rawMoves = getPseudoMoves(r, c, state.board);
+            const validMoves = [];
+            const myColor = p === p.toUpperCase() ? 'white' : 'black';
+
+            // Filter moves that result in self-check
+            for(let move of rawMoves) {
+                const [tr, tc] = move;
+                const captured = state.board[tr][tc];
+                
+                // Sim Move
+                state.board[tr][tc] = p;
+                state.board[r][c] = '.';
+                const oldKing = state.kingPos[myColor];
+                if(p.toLowerCase() === 'k') state.kingPos[myColor] = [tr, tc];
+
+                if(!isAttacked(state.kingPos[myColor][0], state.kingPos[myColor][1], myColor==='white'?'black':'white')) {
+                    validMoves.push(move);
+                }
+
+                // Undo Sim
+                state.board[r][c] = p;
+                state.board[tr][tc] = captured;
+                state.kingPos[myColor] = oldKing;
+            }
+            return validMoves;
+        }
+
+        function getPseudoMoves(r, c, bd) {
+            const p = bd[r][c].toLowerCase();
+            const isWhite = bd[r][c] === bd[r][c].toUpperCase();
+            let moves = [];
+            
+            const enemy = (tr, tc) => bd[tr][tc] !== '.' && (isWhite ? bd[tr][tc]===bd[tr][tc].toLowerCase() : bd[tr][tc]===bd[tr][tc].toUpperCase());
+            const empty = (tr, tc) => bd[tr][tc] === '.';
+            const onBoard = (tr, tc) => tr>=0 && tr<8 && tc>=0 && tc<8;
+
+            if(p === 'p') {
+                const d = isWhite ? -1 : 1;
+                if(onBoard(r+d,c) && empty(r+d,c)) {
+                    moves.push([r+d, c]);
+                    if((isWhite && r===6 || !isWhite && r===1) && empty(r+d*2,c)) moves.push([r+d*2, c]);
+                }
+                if(onBoard(r+d,c-1) && enemy(r+d,c-1)) moves.push([r+d, c-1]);
+                if(onBoard(r+d,c+1) && enemy(r+d,c+1)) moves.push([r+d, c+1]);
+            }
+            else if(p === 'n') {
+                [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr, dc]) => {
+                    if(onBoard(r+dr, c+dc) && (empty(r+dr, c+dc) || enemy(r+dr, c+dc))) moves.push([r+dr, c+dc]);
+                });
+            }
+            else if(p === 'k') {
+                [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
+                    if(onBoard(r+dr, c+dc) && (empty(r+dr, c+dc) || enemy(r+dr, c+dc))) moves.push([r+dr, c+dc]);
+                });
+            }
+            else { // R, B, Q
+                const dirs = p==='r' ? [[0,1],[0,-1],[1,0],[-1,0]] : p==='b' ? [[1,1],[1,-1],[-1,1],[-1,-1]] : [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+                dirs.forEach(([dr, dc]) => {
+                    let nr = r+dr, nc = c+dc;
+                    while(onBoard(nr, nc)) {
+                        if(empty(nr, nc)) moves.push([nr, nc]);
+                        else { if(enemy(nr, nc)) moves.push([nr, nc]); break; }
+                        nr += dr; nc += dc;
+                    }
+                });
+            }
+            return moves;
+        }
+
+        function isAttacked(r, c, byColor) {
+            // Simplified: Scan board for pieces of 'byColor' that can hit [r,c]
+            for(let i=0; i<8; i++) {
+                for(let j=0; j<8; j++) {
+                    const p = state.board[i][j];
+                    if(p !== '.' && (byColor==='white' ? p===p.toUpperCase() : p===p.toLowerCase())) {
+                        const moves = getPseudoMoves(i, j, state.board);
+                        if(moves.some(m => m[0]===r && m[1]===c)) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function inCheck(color) {
+            const [kr, kc] = state.kingPos[color];
+            return isAttacked(kr, kc, color==='white'?'black':'white');
+        }
+
+        function isCheckmate() {
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const p = state.board[r][c];
+                    if(p !== '.' && (state.turn==='white' ? p===p.toUpperCase() : p===p.toLowerCase())) {
+                        if(getLegalMoves(r, c).length > 0) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        /* --- SOUND & UI --- */
+        function playSound(type) {
+            if(!document.getElementById('sound-toggle').checked) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            
+            if(type === 'move') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(100, now+0.1);
+                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now+0.1);
+                osc.start(now); osc.stop(now+0.1);
+            }
+            else if(type === 'capture') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(50, now+0.15);
+                gain.gain.setValueAtTime(0.5, now); gain.gain.linearRampToValueAtTime(0, now+0.15);
+                osc.start(now); osc.stop(now+0.15);
+            }
+            else if(type === 'check') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(200, now+0.3);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now+0.3);
+                osc.start(now); osc.stop(now+0.3);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('card-white').classList.toggle('active', state.turn === 'white');
+            document.getElementById('card-black').classList.toggle('active', state.turn === 'black');
+        }
+
+        function logMove(p, r, c, cap) {
+            const cols = ['a','b','c','d','e','f','g','h'];
+            const entry = document.createElement('div');
+            entry.textContent = `${state.turn==='white'?'W':'B'}: ${p.toUpperCase()}${cap?'x':''}${cols[c]}${8-r}`;
+            document.getElementById('move-log').prepend(entry);
+        }
+
+        function toggleModal(id, show) {
+            const el = document.getElementById(id);
+            if(show) el.classList.add('active');
+            else el.classList.remove('active');
+        }
+
+        function changeTheme(theme) {
+            document.body.className = `theme-${theme}`;
+        }
+        
+        function resetGame() { if(confirm("Restart match?")) initBoard(); }
+        function toggleAssist() {
+            document.getElementById('board').classList.toggle('assist-mode', document.getElementById('assist-toggle').checked);
+        }
+    </script>
+</body>
+</html>
