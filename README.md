@@ -47,12 +47,11 @@ A premium, feature-rich chess game built with pure HTML, CSS, and JavaScript. Ex
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/chess-master.git
-   cd chess-master
+   https://github.com/SURAJVERMA-BIT/CHESS-2D.git
    ```
 
 2. **Open in browser**
-   - Simply open `chess.html` in your web browser
+   - Simply open `chess.html` in your web browser or Run `server.py`
    - No build process or dependencies required!
 
 ### Usage
@@ -181,3 +180,4 @@ If you encounter any issues or have suggestions, please open an issue on GitHub.
 **Made with ♟️ and ❤️**
 
 Enjoy your games of chess!
+
