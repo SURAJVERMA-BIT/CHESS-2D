@@ -1,0 +1,33 @@
+name: HTML Validation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Validate HTML
+      uses: validator/validator-action@v1
+      with:
+        root: '.'
+        file_glob: '*.html'
+        
+    - name: Check file structure
+      run: |
+        if [ ! -f "chess.html" ]; then
+          echo "Error: chess.html not found"
+          exit 1
+        fi
+        if [ ! -f "README.md" ]; then
+          echo "Error: README.md not found"
+          exit 1
+        fi
+        echo "All required files present ✓"
